@@ -1,5 +1,5 @@
 # python-serializer
-A small and easy-to-use library for efficiently serializing data in Python, ideal for network games.
+A small and easy-to-use library for serializing data in Python3, ideal for network games.
 
 **Installation**
 
