@@ -83,6 +83,7 @@ class TableDef:
         if _TABLES.get(name, None) is not None:
             print("WARNING table already defined: {}".format(name))
 
+        self._name = name
         self._id = len(_TABLE_LIST)
         self._datatypes = collections.OrderedDict()
         self._formatstring = '!H'
@@ -115,6 +116,12 @@ class TableDef:
 
         self._formatstring = formatstring
 
+    def tableName(self):
+        return self._name
+
+    def tableID(self):
+        return self._id
+
 
 class Table:
     def __init__(self, tabledef):
@@ -138,3 +145,9 @@ class Table:
         if value is not None:
             value = value[1]
         return value
+
+    def tableName(self):
+        return self._tabledef._name
+
+    def tableID(self):
+        return self._tabledef._id

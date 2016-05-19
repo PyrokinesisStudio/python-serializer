@@ -1,12 +1,3 @@
-# python-serializer
-A small and easy-to-use library for efficiently serializing data in Python, ideal for network games.
-
-**Installation**
-
-Copy packer.py to your project tree
-
-**Usage**
-```python
 import packer
 
 
@@ -39,4 +30,3 @@ print (table.get('x'))
 print (table.get('y'))
 print (table.get('z'))
 print (table.get('name'))
-```
