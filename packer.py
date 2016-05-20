@@ -21,6 +21,30 @@ _TABLES = {}
 _TABLE_LIST = []
 
 
+def join_buffers(bufflist):
+    # Aggregates small buffers to reduce packet overhead
+    # There is no length limit.  We expect fragmentation to be done elsewhere.
+    buff = b''
+    for b in bufflist:
+        b = struct.pack('!H', len(b)) + b
+        buff += b
+
+    # Arranged size,data,size,data....
+    return buff
+
+
+def unjoin_buffers(buff):
+    # Returns a list of buffers that can each be converted with to_table
+    bufflist = []
+    i = 0
+    while i < len(buff):
+        size = struct.unpack('!H', buff[:i + 2][i:])[0]
+        bufflist.append(buff[:i + 2 + size][i + 2:])
+        i = i + 2 + size
+
+    return bufflist
+
+
 def to_bytes(table):
     tabledef = table._tabledef
     data = []
