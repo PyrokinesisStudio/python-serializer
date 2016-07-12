@@ -2,6 +2,7 @@ import collections
 import copy
 import json
 import struct
+import warnings
 
 
 _DATA_TYPES = {}
@@ -55,8 +56,7 @@ def to_bytes(table):
         v = value[1]
 
         if v is None:
-            print("ERROR missing required data: {}".format(key))
-            return None
+            raise KeyError("Missing required field: {}".format(key))
 
         if d == 'json':
             json_data.append([key, v])
@@ -105,7 +105,7 @@ def to_table(buff):
 class TableDef:
     def __init__(self, name):
         if _TABLES.get(name, None) is not None:
-            print("WARNING table already defined: {}".format(name))
+            warnings.warn("Table already defined: {}".format(name))
 
         self._name = name
         self._id = len(_TABLE_LIST)
@@ -119,15 +119,13 @@ class TableDef:
         d = self._datatypes
 
         if d.get(key, None) is not None:
-            print("ERROR key already defined: {}".format(key))
-            return
+            warnings.warn("Key already defined: {}".format(key))
 
         if _DATA_TYPES.get(datatype, None) is None:
-            print ("ERROR datatype not defined: {}".format(datatype))
-            return
+            raise KeyError("Invalid datatype: {}".format(datatype))
 
         d[key] = [_DATA_TYPES[datatype], default]
-        self._datatypes = collections.OrderedDict(sorted(d.items(),
+        self._datatypes = collections.OrderedDict(sorted(list(d.items()),
                 key=lambda t: t[0]))
 
         # Rebuild the format string
@@ -150,19 +148,19 @@ class TableDef:
 class Table:
     def __init__(self, tabledef):
         if type(tabledef) is str:
-            if tabledef not in _TABLES:
-                print("ERROR table not defined: {}".format(tabledef))
-                return
+            # Fails if the table hasn't been defined
             tabledef = _TABLES[tabledef]
 
         self._data = copy.deepcopy(tabledef._datatypes)
         self._tabledef = tabledef  # For referencing ID and format string
 
     def set(self, key, value):
-        if key in self._data:
+        try:
             self._data[key][1] = value
-        else:
-            print("WARNING key not defined: {}".format(key))
+        except KeyError as err:
+            msg = 'Did you forget to run TableDef.define?'.format(key)
+            err.args = err.args + (msg,)
+            raise
 
     def get(self, key):
         value = self._data.get(key, None)
